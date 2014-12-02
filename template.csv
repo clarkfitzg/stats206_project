@@ -1,0 +1,11 @@
+name,code
+gdp,ODA/%s_NGDPD
+gdp_deflator,SGE/%sGD
+unemployment,SGE/%sUNR
+debt,SGE/%sEDBT
+imports,SGE/%sIMVOL
+exports,SGE/%sEXVOL
+interest_rate,SGE/%sIR
+inflation,SGE/%sCPIC
+cpi,SGE/%sCPI
+govspending,SGE/%sGSP
