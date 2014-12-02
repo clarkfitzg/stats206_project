@@ -1,0 +1,89 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}    % just math
+\usepackage{amssymb}    % allow blackboard bold (aka N,R,Q sets)
+\usepackage{amsthm} % allows thm environment
+\usepackage{graphicx, framed} % allows graphics
+\usepackage[none]{hyphenat} % allows graphics
+%\usepackage[margin=1.5cm, vmargin={0pt, 1cm}, includefoot]{geometry}
+
+\title{STA206 Project Proposal \\ Predicting Exchange Rates}
+\author{Clark Fitzgerald, Amy Kim}
+
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{color}
+\usepackage{wrapfig}
+\usepackage{ulem}
+
+\linespread{1}  % single spaces lines
+
+\textwidth 6.5truein  % These 4 commands define more efficient margins
+\textheight 9.5truein
+\oddsidemargin 0.0in
+\topmargin -0.6in
+
+\parskip 5pt  % Also, a bit of space between paragraphs
+
+
+
+\begin{document}
+\maketitle
+\paragraph{1. Group Membership}
+\begin{itemize}
+    \item Clark Fitzgerald (the contact person) clarkfitzg@gmail.com
+    \item Amy Kim atykim@ucdavis.edu
+\end{itemize}
+
+\paragraph{2. Which Data to Analyze}
+
+We use data from Quandl.com, a service that provides clean, documented
+data from a wide variety of sources. The data is loaded directly using a
+web API.
+Using this service will make it easier
+to repeat the analysis in the future, or conduct similar analyses between
+different countries.
+
+The number of variable set in our data is 22 (+4, season, political
+party(Korea, USA), time?), and the number of observations(cases) is 403-
+one for each month from 1981 to 2014.
+
+\subparagraph{Brief Description of Variables}
+\begin{itemize}
+    \item {\tt exchange rate} The market value of the foreign currency reserves held by South Korea. Units: USD Million Current Prices, NSA (monthly) This is our dependent variable.
+    \item {\tt gdp} The gross domestic product
+    \item {\tt unemployment rate} The percentage of the labor force of South Korea who are unemployed and actively seeking work. Units: Percent (monthly)
+    \item {\tt exports} The total value of the goods and services produced by South Korea and purchased by foreign entities. Units: USD Million (Monthly)
+    \item {\tt imports} The total value of a country's imports of physical goods and payments to foreigners for services like shipping and tourism. Units: USD Million (Monthly)
+    \item {\tt interest rate} The monthly average of the central bank policy rate in South Korea. This is the interest rate the central bank charges on loans to commercial banks. Units: Percent (Monthly)
+    \item {\tt inflation rate} The growth rate of the prices in South Korea. (Monthly)
+    \item {\tt consumer produce index} The Consumer Price Index (CPI) is a measure of inflation related to the cost of living. It tracks the prices of essential goods and services like food and healthcare, and weighs those price changes according to their relative importance. The overall change in prices is the inflation rate, which can be positive or negative. The standard CPI fails to account for price drops resulting from improved production technologies, so the chained CPI was crafted to allow for a continuously changing basket of goods. Units: Index Points 2010=100, NSA (Monthly)
+    \item {\tt debt} The total amount of public and private debt in South Korea owned by foreign creditors. Units: USD Million Current Prices, NSA (quarterly)
+    \item {\tt gdp deflator} The relative difference between the real and nominal GDPs of South Korea. Units: Index Points NSA
+    \item {\tt goverment spending} The yearly expenditure of the federal government of South Korea. Units: KRW Billion Constant Prices, SA 
+    \item {\tt season} categorical
+    \item {\tt Political party}  categorical
+\end{itemize}
+
+\paragraph{3. Questions of interest}
+\begin{itemize}
+    \item Can we predict the exchange rate between two countries using various
+economic indicators? 
+    \item When is the best time to exchange the currency from won(Korea currency) to dollar or vise versa? 
+    \item Can we find a predict/relationship equation that could be applied over other countries' currency? 
+
+\end{itemize}
+
+\paragraph{4. Plan for the data analysis}
+As usual, we start plotting, pair scattor plots, and comparing correlations to pick model candidates. Can we use cross-validation? Since we will have factors(season, predential political parties), could we use 2-way anova the currency rate would different across season, politics?
+After obtaining a final model, we also will check if similar models can be
+used between other pairs of contries.
+
+\textbf{Anticipated problems}
+Some variables like GDP are reported annually or quarterly. To use them with the
+variables that are at a monthly grain we will have to impute the missing
+values. Some variables in the data are paired (i.e. gdp for Korea, gdp for USA
+etc.), so they could be highly correlated. How well do we handle the
+correlations? Do we add time as variable? 
+
+\end{document}
+
