@@ -37,31 +37,38 @@
 \paragraph{2. Which Data to Analyze}
 
 We use data from Quandl.com, a service that provides clean, documented
-data from a wide variety of sources. The data is loaded directly using a
+data from a wide variety of sources including the US Federal Reserve,
+World Bank, and the National Bank of Korea. The data is loaded directly using a
 web API.
 Using this service will make it easier
 to repeat the analysis in the future, or conduct similar analyses between
 different countries.
 
-The number of variable set in our data is 22 (+4, season, political
-party(Korea, USA), time?), and the number of observations(cases) is 403-
-one for each month from 1981 to 2014.
+There are 25 variables to analyze. 11 economic indicators for each country,
+as well as season (winter, spring, summer, fall),  and possibly time.
+The number of observations(cases) is 403, one for each month from 1981 to 2014.
+
+{\tt Exchange rate} between Korean Won and US dollar is the primary $Y$
+variable.
+
 
 \subparagraph{Brief Description of Variables}
+For each country we will examine the following variables.
+
 \begin{itemize}
-    \item {\tt exchange rate} The market value of the foreign currency reserves held by South Korea. Units: USD Million Current Prices, NSA (monthly) This is our dependent variable.
-    \item {\tt gdp} The gross domestic product
-    \item {\tt unemployment rate} The percentage of the labor force of South Korea who are unemployed and actively seeking work. Units: Percent (monthly)
-    \item {\tt exports} The total value of the goods and services produced by South Korea and purchased by foreign entities. Units: USD Million (Monthly)
+    \item {\tt gdp} The gross domestic product. Units: USD Million
+    \item {\tt unemployment rate} The percentage of the labor force who are unemployed and actively seeking work. Units: Percent (monthly)
+    \item {\tt exports} The total value of the goods and services
+produced domestically and purchased by foreign entities. Units: USD Million (Monthly)
     \item {\tt imports} The total value of a country's imports of physical goods and payments to foreigners for services like shipping and tourism. Units: USD Million (Monthly)
-    \item {\tt interest rate} The monthly average of the central bank policy rate in South Korea. This is the interest rate the central bank charges on loans to commercial banks. Units: Percent (Monthly)
-    \item {\tt inflation rate} The growth rate of the prices in South Korea. (Monthly)
+    \item {\tt interest rate} The monthly average of the central bank policy rate. This is the interest rate the central bank charges on loans to commercial banks. Units: Percent (Monthly)
+    \item {\tt inflation rate} The growth rate of the prices. (Monthly)
     \item {\tt consumer produce index} The Consumer Price Index (CPI) is a measure of inflation related to the cost of living. It tracks the prices of essential goods and services like food and healthcare, and weighs those price changes according to their relative importance. The overall change in prices is the inflation rate, which can be positive or negative. The standard CPI fails to account for price drops resulting from improved production technologies, so the chained CPI was crafted to allow for a continuously changing basket of goods. Units: Index Points 2010=100, NSA (Monthly)
-    \item {\tt debt} The total amount of public and private debt in South Korea owned by foreign creditors. Units: USD Million Current Prices, NSA (quarterly)
-    \item {\tt gdp deflator} The relative difference between the real and nominal GDPs of South Korea. Units: Index Points NSA
-    \item {\tt goverment spending} The yearly expenditure of the federal government of South Korea. Units: KRW Billion Constant Prices, SA 
-    \item {\tt season} categorical
-    \item {\tt Political party}  categorical
+    \item {\tt debt} The total amount of public and private debt owned by foreign creditors. Units: USD Million Current Prices, NSA (quarterly)
+    \item {\tt gdp deflator} The relative difference between the real and nominal GDPs. Units: Index Points NSA
+    \item {\tt goverment spending} The yearly expenditure of the federal government. Units: KRW Billion Constant Prices, SA 
+    \item {\tt political party} Categorical variable for the political
+party of the president.
 \end{itemize}
 
 \paragraph{3. Questions of interest}
