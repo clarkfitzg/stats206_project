@@ -55,6 +55,8 @@ ggplot(data=sk_long[complete.cases(sk_long), ]
        , aes(x=Date, y=value, color=variable)) + 
        geom_line()
 
+ggsave('figure/scaled_variable_kor.pdf')
+
 # Interest rate stays mostly flat
 # We could add a column that records the number of NA's
 # in that particular row.
@@ -67,6 +69,7 @@ plot(as.factor(num_nas))
 # Now for the linear interpolation. 
 # The Date column was causing problems. Maybe that should be
 # the index?
-kfull = data.frame(na.approx(k2[, -1]))
+kfull = zoo(na.approx(k2[, -1]))
+index(kfull) = k2$Date
 
-write.csv(kfull, 'korea.csv')
+write.zoo(kfull, 'korea.csv')
