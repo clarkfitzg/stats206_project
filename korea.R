@@ -12,6 +12,8 @@ template = read.csv('template.csv', stringsAsFactors=FALSE)
 #exchange = Quandl("FRED/EXKOUS", trim_start="1981-04-01", trim_end="2014-10-01", authcode = authcode)
 
 getcountry = function(countrycode){
+    # Fetches live data from Quandl
+
     codes = sprintf(template$code, countrycode)
 
     out = Quandl(codes, trim_start="1981-04-01", trim_end="2014-10-01"
@@ -39,10 +41,13 @@ na_plot = function(dframe, filename){
     # If plots are roughly linear, then imputing through linear
     # interpolation should be ok.
 
-    # On which columns do we need to impute?
-    needimpute = sapply(dframe, function(x) any(is.na(x)))
+    # We'll only impute on the results of na_truncate
+    truncd = na_truncate(dframe)
 
-    scaled = data.frame(Date = dframe$Date, scale(dframe[, which(needimpute)]))
+    # On which columns do we need to impute?
+    needimpute = sapply(truncd, function(x) any(is.na(x)))
+
+    scaled = data.frame(Date = truncd$Date, scale(truncd[, which(needimpute)]))
     scaled_long = reshape2::melt(scaled, id = 'Date')
 
     ggplot(data=scaled_long[complete.cases(scaled_long), ]
@@ -61,13 +66,19 @@ interpolate = function(dframe){
 
 pipecountry = function(country){
     # Takes a single country through the data processing pipeline
+    isocode = 'KOR'
+
+    na_plot(country, sprintf('figure/na_plot_%s.pdf', isocode))
+
     country %>% interpolate %>% na_truncate
 }
 
-a = pipecountry(korea)
+#KOR = pipecountry(korea)
 
 # Now they should be all populated
-sum(complete.cases(a)) == nrow(a)
+sum(complete.cases(KOR)) == nrow(KOR)
+
+save(korea, KOR, file='KOR.rda')
 
 #kfull = data.frame(Date = k2$Date, (na.approx(k2[, -1])))
 
