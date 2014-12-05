@@ -1,29 +1,49 @@
+# Fri Dec  5 13:48:09 PST 2014
+# Clark Fitzgerald
+# 
+# Collects data from Quandl.com for regression analysis of exchange rates
+# between South Korea and USA.
+# 
+# - Compare other countries by changing the main code in the bottom and
+#   using other 3 letter ISO codes
+#
+# - Save your Quandl authcode in the same directory in a plain text file
+#   called 'authcode.txt'.
+#
+# - Must have a folder in this directory called 'figure' to save plots.
+#
+# - Downloaded and massaged data structures will be saved in 'country.Rda'.
+#   To reload them without downloading again run this in R:
+#       > load('country.Rda')
+#
+# - Edit template.csv to add more parameters using 3 letter ISO codes
+
+
 library(Quandl)
 library(reshape2)
 library(ggplot2)
 library(magrittr)
 
+
+# Date in Quandl format
+today = format(Sys.time(), '%Y-%m-%d')
+
+# Could also put your authcode here as a string
 authcode = scan('authcode.txt', what='')
 
 template = read.csv('template.csv', stringsAsFactors=FALSE)
-
-# Target Y variable:
-# Exchange rate: won / USD
-#exchange = Quandl("FRED/EXKOUS", trim_start="1981-04-01", trim_end="2014-10-01", authcode = authcode)
 
 getcountry = function(countrycode){
     # Fetches live data from Quandl
 
     codes = sprintf(template$code, countrycode)
 
-    out = Quandl(codes, trim_start="1981-04-01", trim_end="2014-10-01"
+    out = Quandl(codes, trim_start="1981-04-01", trim_end=today
                 , collapse='monthly', sort='asc', authcode=authcode)
 
     names(out) = c('Date', paste(template$name, countrycode, sep = '_'))
     return(out)
 } 
-
-#korea = getcountry('KOR')
 
 na_truncate = function(dframe){
     # Truncates a data frame by identifying the smallest range for
@@ -64,22 +84,30 @@ interpolate = function(dframe){
     data.frame(Date = dframe$Date, (na.approx(dframe[, -1])))
 }
 
-pipecountry = function(country){
+pipecountry = function(isocode){
     # Takes a single country through the data processing pipeline
-    isocode = 'KOR'
 
+    country = getcountry(isocode)
     na_plot(country, sprintf('figure/na_plot_%s.pdf', isocode))
 
     country %>% interpolate %>% na_truncate
 }
 
-#KOR = pipecountry(korea)
+############################################################
+# All the action code is here:
+############################################################
 
-# Now they should be all populated
-sum(complete.cases(KOR)) == nrow(KOR)
+# Target Y variable:
+# Exchange rate: won / USD
+exchange = Quandl("FRED/EXKOUS", trim_start="1981-04-01", trim_end=today
+                  , collapse='monthly', sort='asc', authcode=authcode)
 
-save(korea, KOR, file='KOR.rda')
+names(exchange)[2] = 'exchange_rate'
 
-#kfull = data.frame(Date = k2$Date, (na.approx(k2[, -1])))
+USA = pipecountry('USA')
+KOR = pipecountry('KOR')
 
-#write.csv(kfull, 'korea.csv')
+# Merge on common 'Date' column. This is the primary table for analysis
+country = merge(exchange, merge(KOR, USA))
+
+save(country, exchange, USA, KOR, file='country.Rda')
