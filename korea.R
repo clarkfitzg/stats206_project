@@ -1,6 +1,7 @@
 library(Quandl)
 library(reshape2)
 library(ggplot2)
+library(magrittr)
 
 authcode = scan('authcode.txt', what='')
 
@@ -22,54 +23,52 @@ getcountry = function(countrycode){
 
 #korea = getcountry('KOR')
 
-# Impute missing data
+na_truncate = function(dframe){
+    # Truncates a data frame by identifying the smallest range for
+    # all variables
 
-# When does each column start and end?
-begindate = sapply(korea, function(x) which(!is.na(x))[1])
-enddate = sapply(korea, function(x) tail(which(!is.na(x)), 1))
+    # When does each column start and end?
+    begindate = sapply(dframe, function(x) which(!is.na(x))[1])
+    enddate = sapply(dframe, function(x) tail(which(!is.na(x)), 1))
 
-# So unemployment, interest rate, and debt start later, in 1999
-# That's not so bad. We can truncate the data set to start there and still
-# have about 200 rows. That may actually be better because we cut out the
-# IMF period in 1999.
+    dframe[max(begindate):min(enddate), ]
+}
 
-# Truncated
-k2 = korea[max(begindate):min(enddate), ]
+na_plot = function(dframe, filename){
+    # Plot the scaled variables to check for linearity.
+    # If plots are roughly linear, then imputing through linear
+    # interpolation should be ok.
 
-# On which columns do we need to impute?
-needimpute = sapply(k2, function(x) any(is.na(x)))
-needimpute[needimpute]
-# Need to plot GDP, gdp deflator, debt, govspending
-which(is.na(k2$interest_rate_KOR))
-# Only one observation missing from interest rate
+    # On which columns do we need to impute?
+    needimpute = sapply(dframe, function(x) any(is.na(x)))
 
-# If plots are roughly linear, then imputing through linear
-# interpolation should be ok. Also could use 
-# exponentially weighted moving average
+    scaled = data.frame(Date = dframe$Date, scale(dframe[, which(needimpute)]))
+    scaled_long = reshape2::melt(scaled, id = 'Date')
 
-# Plot the scaled variables to check for linearity
-sk = data.frame(Date = k2$Date, scale(k2[, which(needimpute)]))
-sk_long = reshape2::melt(sk, id = 'Date')
+    ggplot(data=scaled_long[complete.cases(scaled_long), ]
+           , aes(x=Date, y=value, color=variable)) + 
+           geom_line()
 
-ggplot(data=sk_long[complete.cases(sk_long), ]
-       , aes(x=Date, y=value, color=variable)) + 
-       geom_line()
+    ggsave(filename)
+}
 
-ggsave('figure/scaled_variable_kor.pdf')
+interpolate = function(dframe){
+    # Impute missing data using linear interpolation.
 
-# Interest rate stays mostly flat
-# We could add a column that records the number of NA's
-# in that particular row.
+    # The Date column was causing problems.
+    data.frame(Date = dframe$Date, (na.approx(dframe[, -1])))
+}
 
-num_nas = apply(sk, 1, function(x) sum(is.na(x)))
-plot(as.factor(num_nas))
-# We see that there are lots of NA's. Could add a boolean variable with
-# TRUE for 3 or 4 NA's. May make a difference in regression.
+pipecountry = function(country){
+    # Takes a single country through the data processing pipeline
+    country %>% interpolate %>% na_truncate
+}
 
-# Now for the linear interpolation. 
-# The Date column was causing problems. Maybe that should be
-# the index?
-kfull = zoo(na.approx(k2[, -1]))
-index(kfull) = k2$Date
+a = pipecountry(korea)
 
-write.zoo(kfull, 'korea.csv')
+# Now they should be all populated
+sum(complete.cases(a)) == nrow(a)
+
+#kfull = data.frame(Date = k2$Date, (na.approx(k2[, -1])))
+
+#write.csv(kfull, 'korea.csv')
