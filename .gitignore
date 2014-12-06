@@ -13,3 +13,5 @@
 authcode.txt
 *.aux
 *.log
+*.pdf
+*.swp

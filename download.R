@@ -4,6 +4,9 @@
 # Collects data from Quandl.com for regression analysis of exchange rates
 # between South Korea and USA.
 # 
+# - Downloaded and massaged data structures will be saved in 'country.Rda'.
+#   To reload them without downloading again run this in R:
+#       > load('country.Rda')
 # - Compare other countries by changing the main code in the bottom and
 #   using other 3 letter ISO codes
 #
@@ -12,11 +15,8 @@
 #
 # - Must have a folder in this directory called 'figure' to save plots.
 #
-# - Downloaded and massaged data structures will be saved in 'country.Rda'.
-#   To reload them without downloading again run this in R:
-#       > load('country.Rda')
-#
 # - Edit template.csv to add more parameters using 3 letter ISO codes
+#
 
 
 library(Quandl)
@@ -93,21 +93,46 @@ pipecountry = function(isocode){
     country %>% interpolate %>% na_truncate
 }
 
+ttsplit = function(dframe, testportion, makeglobal=FALSE){
+    # Splits the rows of dframe, returning a list of train and 
+    # validate dataframes 
+    # If makeglobal is TRUE then variables train and validate are created
+    # in the global namespace and nothing is returned.
+
+    n = nrow(country)
+    testsize = round(n * testportion)
+    testindex = sample(1:n, size = testsize, replace=FALSE)
+    out = list(train = country[-testindex, ], 
+               validate = country[testindex, ])
+    if (makeglobal){
+        trainset <<- out[['train']]
+        validate <<- out[['validate']]
+    }
+    else{
+        return(out)
+    }
+}
+
 ############################################################
 # All the action code is here:
 ############################################################
 
-# Target Y variable:
-# Exchange rate: won / USD
-exchange = Quandl("FRED/EXKOUS", trim_start="1981-04-01", trim_end=today
-                  , collapse='monthly', sort='asc', authcode=authcode)
+main = function(){
+    # Target Y variable:
+    # Exchange rate: won / USD
+    exchange = Quandl("FRED/EXKOUS", trim_start="1981-04-01", trim_end=today
+                      , collapse='monthly', sort='asc', authcode=authcode)
 
-names(exchange)[2] = 'exchange_rate'
+    names(exchange)[2] = 'exchange_rate'
 
-USA = pipecountry('USA')
-KOR = pipecountry('KOR')
+    USA = pipecountry('USA')
+    KOR = pipecountry('KOR')
 
-# Merge on common 'Date' column. This is the primary table for analysis
-country = merge(exchange, merge(KOR, USA))
+    # Merge on common 'Date' column. This is the primary table for analysis
+    country = merge(exchange, merge(KOR, USA))
 
-save(country, exchange, USA, KOR, file='country.Rda')
+    # Reserve one third of the data for a validation set
+    ttsplit(country, testportion = 1/3, makeglobal=TRUE)
+
+    save(validate, trainset, country, exchange, USA, KOR, file='country.Rda')
+}
