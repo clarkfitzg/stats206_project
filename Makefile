@@ -2,7 +2,7 @@
 TEXFILE = paper
 
 # Names of all figures to include
-FIGURES := correlation.pdf
+FIGURES := correlation.pdf us_debt.pdf
 
 ############################################################
 
