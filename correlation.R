@@ -10,8 +10,7 @@ corhist = function(dframe){
     numcols = sapply(dframe, is.numeric)
     cormatrix = cor(dframe[, numcols])
 
-    hist(cormatrix[upper.tri(cormatrix)], 
-         main = 'Histogram of Pairwise Correlations',
+    hist(cormatrix[upper.tri(cormatrix)], main = '',
          xlab = 'Correlations')
 }
 
