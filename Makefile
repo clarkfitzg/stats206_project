@@ -2,12 +2,14 @@
 TEXFILE = paper
 
 # Names of all figures to include
-FIGURES := correlation.pdf us_debt.pdf
+FIGURES := correlation.pdf us_debt.pdf na_plot_KOR.pdf
 
 ############################################################
 
 # Main target
+# Running twice to make sure to get the figure references
 $(TEXFILE).pdf : $(TEXFILE).tex $(FIGURES)
+	pdflatex $(TEXFILE).tex
 	pdflatex $(TEXFILE).tex
 
 # A recipe describing how to make .pdf files

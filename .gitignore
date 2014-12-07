@@ -11,8 +11,12 @@
 .Rproj.user/
 
 authcode.txt
-*.aux
-*.log
 *.pdf
 *.swp
 *.Rout
+
+# LaTeX byproducts
+*.lof
+*.out
+*.aux
+*.log

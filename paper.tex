@@ -36,53 +36,49 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \begin{document}
 
-\begin{center}
-    {\Large Assignment 1}\\
-    \bigskip
-    \hrule
-    \medskip
-    Clark Fitzgerald\\
-    Stats 123
-\end{center}
+\title{US Korea Exchange Rates \\ STA206 Final Project}
+\date{December 15, 2014}
+\author{Clark Fitzgerald clarkfitzg@gmail.com \\ 
+        Amy Kim atykim@ucdavis.edu}
 
-\section*{Makefiles}
+\maketitle
 
-Originally designed for compiling large software projects, Makefiles can automate the dependencies between data analysis steps, enabling \textbf{reproducible research}.\footnote{For more on reproducible research, check out the chapter on Open Source Scientific Practice by K. Jarrod Millman and Fernando Perez available at \url{https://osf.io/h9gsd/}.}
+\begin{abstract}
+    We analyze the exchange rate between the United States and South Korea
+    using monthly country level economic data.
+\end{abstract}
 
-\begin{description}
-    \item[Statistics-] So hot right now.
-    \begin{enumerate}
-        \item This is a nested list.
-        \item We are shooting for highly nested stuff here.
-    \end{enumerate}
-    \item[Mathematics-] Always classic.
-\end{description}
+\section{Introduction}
 
-\vspace{0.3in}
+\section{Methods and Results}
 
-\subsubsection*{R graphics}
+Figure~\ref{fig:correlation} shows a histogram of all the pairwise sample
+correlations.
 
-Display equations:
+Figure~\ref{fig:na_plot_KOR} shows the variables which were interpolated.
 
-\[
-    f(x) = x^2 + 5x + \pi
-\]
+\section{Conclusions and Discussion}
 
-Inline equation $\sum x$, and so on.
 
-You can generate simulated data with R or Python.
+\newpage
+\section{Appendix}
 
-\section{R for Graphics}
+\listoffigures
 
-Here is some R code.
+\begin{figure}
+  \centering
+    \includegraphics{correlation.pdf}
+  \caption{Histogram of all pairwise sample correlations.}
+  \label{fig:correlation}
+\end{figure}
 
-Which generates the corresponding plot:
-
-\centerline{\includegraphics{correlation.pdf}}
-
-\centerline{\includegraphics{us_debt.pdf}}
+\begin{figure}
+  \centering
+    \includegraphics{na_plot_KOR.pdf}
+  \caption{Scaled variables with NA values.}
+  \label{fig:na_plot_KOR}
+\end{figure}
 
 \end{document}
