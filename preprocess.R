@@ -1,5 +1,6 @@
 # Preprocessing steps
 
+library(zoo)
 library(reshape2)
 library(ggplot2)
 library(magrittr)
@@ -20,14 +21,12 @@ interpolate = function(dframe){
     # Impute missing data using linear interpolation.
 
     # The Date column was causing problems.
-    data.frame(Date = dframe$Date, (na.approx(dframe[, -1])))
+    data.frame(Date = dframe$Date, (zoo::na.approx(dframe[, -1])))
 }
 
-pipecountry = function(isocode){
+pipecountry = function(country){
     # Takes a single country through the data processing pipeline
-
-    country = getcountry(isocode)
-    na_plot(country, sprintf('figure/na_plot_%s.pdf', isocode))
+    #na_plot(country, sprintf('figure/na_plot_%s.pdf', isocode))
 
     country %>% interpolate %>% na_truncate
 }
@@ -52,20 +51,16 @@ ttsplit = function(dframe, testportion, makeglobal=FALSE){
     }
 }
 
-x = 10
-save(x, file='country.Rda')
-############################################################
-# All the action code is here:
-############################################################
-#
-#USA = pipecountry('USA')
-#KOR = pipecountry('KOR')
-#
-## Merge on common 'Date' column. This is the primary table for analysis
-#country = merge(exchange, merge(KOR, USA))
-#
-## Reserve one third of the data for a validation set
-#ttsplit(country, testportion = 1/3, makeglobal=TRUE)
-#
-#save(validate, trainset, country, exchange, USA, KOR, file='country.Rda')
-#}
+# Cache from downloader
+load('cache.Rda')
+
+USA_clean = pipecountry(USA)
+KOR_clean = pipecountry(KOR)
+
+# Merge on common 'Date' column. This is the primary table for analysis
+country = merge(exchange, merge(KOR_clean, USA_clean))
+
+# Reserve one third of the data for a validation set
+ttsplit(country, testportion = 1/3, makeglobal=TRUE)
+
+save(validate, trainset, country, exchange, USA, KOR, file='country.Rda')
