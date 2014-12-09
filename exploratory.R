@@ -22,6 +22,8 @@ plot(fit1)
 # Intentionally Remove the effects of time
 timefit = lm(exchange_rate ~ Date, data=trainset)
 plot(timefit)
+# This is a terrible fit - exchange rate is not linear over time.
+# Anyways, it would be difficult to fully remove time
 
 country_notime = cbind(exchange_notime = trainset$exchange_rate - predict(timefit),
                        trainset[, -c(1, 2)])
