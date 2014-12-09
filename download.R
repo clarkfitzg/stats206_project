@@ -15,15 +15,11 @@
 #
 # - Must have a folder in this directory called 'figure' to save plots.
 #
-# - Edit template.csv to add more parameters using 3 letter ISO codes
+# - Edit quandl_template.csv to add more parameters using 3 letter ISO codes
 #
 
 
 library(Quandl)
-library(reshape2)
-library(ggplot2)
-library(magrittr)
-
 
 # Date in Quandl format
 today = format(Sys.time(), '%Y-%m-%d')
@@ -31,7 +27,7 @@ today = format(Sys.time(), '%Y-%m-%d')
 # Could also put your authcode here as a string
 authcode = scan('authcode.txt', what='')
 
-template = read.csv('template.csv', stringsAsFactors=FALSE)
+template = read.csv('quandl_template.csv', stringsAsFactors=FALSE)
 
 getcountry = function(countrycode){
     # Fetches live data from Quandl
@@ -45,94 +41,14 @@ getcountry = function(countrycode){
     return(out)
 } 
 
-na_truncate = function(dframe){
-    # Truncates a data frame by identifying the smallest range for
-    # all variables
+# Target Y variable:
+# Exchange rate: won / USD
+exchange = Quandl("FRED/EXKOUS", trim_start="1981-04-01", trim_end=today
+                  , collapse='monthly', sort='asc', authcode=authcode)
 
-    # When does each column start and end?
-    begindate = sapply(dframe, function(x) which(!is.na(x))[1])
-    enddate = sapply(dframe, function(x) tail(which(!is.na(x)), 1))
+names(exchange)[2] = 'exchange_rate'
 
-    dframe[max(begindate):min(enddate), ]
-}
+USA = getcountry('USA')
+KOR = getcountry('KOR')
 
-na_plot = function(dframe, filename){
-    # Plot the scaled variables to check for linearity.
-    # If plots are roughly linear, then imputing through linear
-    # interpolation should be ok.
-
-    # We'll only impute on the results of na_truncate
-    truncd = na_truncate(dframe)
-
-    # On which columns do we need to impute?
-    needimpute = sapply(truncd, function(x) any(is.na(x)))
-
-    scaled = data.frame(Date = truncd$Date, scale(truncd[, which(needimpute)]))
-    scaled_long = reshape2::melt(scaled, id = 'Date')
-
-    ggplot(data=scaled_long[complete.cases(scaled_long), ]
-           , aes(x=Date, y=value, color=variable)) + 
-           geom_line()
-
-    ggsave(filename)
-}
-
-interpolate = function(dframe){
-    # Impute missing data using linear interpolation.
-
-    # The Date column was causing problems.
-    data.frame(Date = dframe$Date, (na.approx(dframe[, -1])))
-}
-
-pipecountry = function(isocode){
-    # Takes a single country through the data processing pipeline
-
-    country = getcountry(isocode)
-    na_plot(country, sprintf('figure/na_plot_%s.pdf', isocode))
-
-    country %>% interpolate %>% na_truncate
-}
-
-ttsplit = function(dframe, testportion, makeglobal=FALSE){
-    # Splits the rows of dframe, returning a list of train and 
-    # validate dataframes 
-    # If makeglobal is TRUE then variables train and validate are created
-    # in the global namespace and nothing is returned.
-
-    n = nrow(country)
-    testsize = round(n * testportion)
-    testindex = sample(1:n, size = testsize, replace=FALSE)
-    out = list(train = country[-testindex, ], 
-               validate = country[testindex, ])
-    if (makeglobal){
-        trainset <<- out[['train']]
-        validate <<- out[['validate']]
-    }
-    else{
-        return(out)
-    }
-}
-
-############################################################
-# All the action code is here:
-############################################################
-
-main = function(){
-    # Target Y variable:
-    # Exchange rate: won / USD
-    exchange = Quandl("FRED/EXKOUS", trim_start="1981-04-01", trim_end=today
-                      , collapse='monthly', sort='asc', authcode=authcode)
-
-    names(exchange)[2] = 'exchange_rate'
-
-    USA = pipecountry('USA')
-    KOR = pipecountry('KOR')
-
-    # Merge on common 'Date' column. This is the primary table for analysis
-    country = merge(exchange, merge(KOR, USA))
-
-    # Reserve one third of the data for a validation set
-    ttsplit(country, testportion = 1/3, makeglobal=TRUE)
-
-    save(validate, trainset, country, exchange, USA, KOR, file='country.Rda')
-}
+save(exchange, USA, KOR, file='cache.Rda')
