@@ -6,6 +6,8 @@ library(ggplot2)
 library(magrittr)
 
 
+set.seed(893)
+
 na_truncate = function(dframe){
     # Truncates a data frame by identifying the smallest range for
     # all variables
