@@ -55,8 +55,8 @@
 \subsection{Background}
 
 In today's highly connected global society people and money move between
-countries. The exchange rates between countries determine the value of
-that currency.
+countries. The exchange rates between countries determine the relative
+value of that money.
 
 We analyze data on exchange rate between the US and Korea from 1999 to
 2014. In 1997 the IMF crisis in Korea perturbed the economic indicators,
@@ -96,10 +96,8 @@ sense to do it when the exchange rates
 are favorable for the transfer. For example, you may want to sell a
 house in Korea and put that money towards a house in the US.
 
-If one plans to go on vacation in a foreign country then it makes sense to
-visit a country where the exchange rate is favorable.
-
 \subsection{Data}
+
 We use data from Quandl.com, a service that provides clean, documented
 data from a wide variety of sources including the US Federal Reserve,
 World Bank, and the National Bank of Korea. 
@@ -127,12 +125,70 @@ party of the president.
 
 \section{Methods and Results}
 
-\subsection{Data Collection}
-The data is loaded directly using a
-web API (Application programming interface).
-Using this service will make it easier to repeat the analysis in the future, or conduct similar analyses between
+\subsection{Dynamic Data}
+
+The data used in this analysis is unusual- it's generated dynamically from
+live, high quality sources, and is self updating. The data is loaded directly from Quandl using a REST (Representational 
+State Transfer) web API (Application programming interface), and then
+cached locally, limiting network dependence.
+Using this service makes it easy to repeat the analysis in the future, or conduct similar analyses between
 different countries.
 
+\subsection{Reproducibility}
+
+Above we mentioned that the data and all analysis in the report is self 
+updating. This is accomplished through the use of GNU \texttt{make}, which
+describes a DAG (Directed Acyclic Graph) of dependencies for the final
+report. \texttt{make} detects file modifications and will lazily run all
+commands and scripts required for the final output.
+
+What does this mean? Suppose that we need more variables to do the
+regression. Thanks to the use
+of industry standard ISO codes for the countries and proper parameters in
+our code base this becomes a simple task.
+We've stored string templates for the country level 
+variables in a file
+called \texttt{template.txt}. The data collection and preprocessing steps
+are automated, so we can add more variables simply by adding a row to
+\texttt{template.txt} and entering the command \texttt{make} from the shell
+prompt, which causes the following sequence of events: 
+
+\begin{enumerate}
+    \item \texttt{make} detects the changed template file
+    \item The script \texttt{download.R} runs, updating the cache
+    \item The script \texttt{preprocess.R} runs, applying the appropriate
+        transformations and joining the tables to a form suitable for
+        analysis
+    \item All other scripts which depend on the preprocessed data run
+    \item The report output is produced
+\end{enumerate}
+
+In this case the output is a PDF, but it could just as easily be a web page
+on the department server, or an upload into another REST API.
+
+If we were doing this analysis for a client and need to run it again a year
+later with a new year of data 
+then all we have to do is type \texttt{make}. We'll still need to interpret
+plots and models, but the most time consuming work is done.
+
+One other aspect of reproducibility is version control. In this
+project we've used \texttt{Git} to collect snapshots of the project at
+every stage. The project is hosted publicly on
+Github\footnote{\url{https://github.com/clarkfitzg/stats206\_project}}.
+A look at the log file shows what work happened when and why,
+which is important for establishing provenance. In particular it shows 
+that we've been active on this project every day since
+December 1st. Here's an example of a log entry:
+
+\begin{verbatim}
+commit e2beaf01b0a1457e7167989c1fae575c2a676f19
+Author: Clark Fitzgerald <clarkfitzg@gmail.com>
+Date:   Mon Dec 8 20:51:04 2014 -0800
+
+    implemented local caching, decoupled download step
+\end{verbatim}
+The point is that through a little engineering the data analysis process
+can be made transparent, automated, extensible, and fully reproducible.
 
 
 Figure~\ref{fig:correlation} shows a histogram of all the pairwise sample
