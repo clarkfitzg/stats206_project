@@ -2,7 +2,9 @@
 TEXFILE = paper
 
 # Names of all figures to include
-FIGURES := correlation.pdf us_debt.pdf na_plot_KOR.pdf
+FIGURES := correlation.pdf us_debt.pdf na_plot_KOR.pdf 
+
+#scatterplot.pdf
 
 ############################################################
 
