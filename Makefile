@@ -16,7 +16,7 @@ $(TEXFILE).pdf : $(TEXFILE).tex $(FIGURES) country.Rda
 cache.Rda : download.R quandl_template.csv
 	R CMD BATCH $<
 
-country.Rda : preprocess.R cache.Rda
+country.Rda : preprocess.R cache.Rda functions.R
 	R CMD BATCH $<
 
 # A recipe describing how to make .pdf files

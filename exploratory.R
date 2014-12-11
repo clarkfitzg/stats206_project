@@ -2,6 +2,7 @@ library(ggplot2)
 
 # Exploratory data analysis
 load('country.Rda')
+source('functions.R')
 
 # Why is debt going down for the US? Because it's a huge negative number!
 # Plot it and look at the range in order to see this.
@@ -27,6 +28,28 @@ plot(timefit)
 
 country_notime = cbind(exchange_notime = trainset$exchange_rate - predict(timefit),
                        trainset[, -c(1, 2)])
+
 fit2 = lm(exchange_notime ~ ., data = country_notime)
 summary(fit2)
 plot(fit2)
+
+
+# Thu Dec 11 14:18:14 PST 2014
+
+set.seed(123)
+
+# Get the difference between each previous row
+countrydiff = as.data.frame(sapply(country, diff))
+
+# Drop the date column
+countrydiff = countrydiff[, -1]
+
+ttsplit(countrydiff, 1 / 3, makeglobal=TRUE)
+
+mod1 = lm(exchange_rate ~ ., data=trainset)
+summary(mod1)
+
+library(leaps)
+
+r1 = regsubsets(exchange_rate ~ ., data=trainset)
+s1 = summary(r1)
