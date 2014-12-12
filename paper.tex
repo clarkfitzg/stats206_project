@@ -196,12 +196,46 @@ using their capabilities we can
 
 \subsection{Exploratory Data Analysis}
 
-Figure~\ref{fig:scatterplot} shows what the untransformed data looks like.
-There are very clear patterns emerging, probably due to the time dependency
-of all variables.
+We started out with some general summary statistics and plotting. The first
+issue was missing data, which we had anticipated. While most of the
+variables were reported monthly, \texttt{debt} was reported on a quarterly
+basis and 
+Our simple approach for dealing with this was to
+make a plot of these variables over time.
+If they are approximately linear then we could 
+linearly interpolate with respect to time. The scaled plots 
+\ref{fig:na_plot_KOR} and
+\ref{fig:na_plot_USA} do appear to be mostly linear, so we interpolated. 
+In this plots one can observe that $debt_USA$ is decreasing; this is
+because $debt$ carries a sign. The value of $debt_USA$ on 
 
+When beginning this project we knew that the time dependency and
+multicollinearity would be the
+biggest obstacles, since in this case the assumption that the errors
+$\epsilon_i \sim N(0, \sigma^2)$ does not hold.
+Figure~\ref{fig:scatterplot} shows what the original data looks like.
+We observe clear patterns emerging, with some even approaching a
+continuous mathematical functional relationship- ie the patterns
+between \texttt{gdp}, \texttt{gdp\_deflator}, and \texttt{debt} for Korea.
 Figure~\ref{fig:correlation} shows a histogram of all the pairwise sample
-correlations.
+correlations for the original data set- they are 
+
+Our first approach for overcoming this time dependence was to create a new
+data frame from the original data by taking the difference between each
+subsequent row. More formally, if our original design matrix $X$ is $n
+\times p$ then we can define a new $n - 1 \times p$ matrix $\tilde{X}$ by
+setting
+\[
+    \tilde{X_{i,*}} = X_{(i + 1), *} - X_{i, *}
+\]
+for $i = 1, 2, \dots, n-1$ where $X_{i, *}$ represents the $i$th row of
+$X$.
+
+This approach did indeed eliminate the most obvious patterns, but 
+sacrifices interpretability 
+
+Our first step was to separate the data into training and validation sets,
+and only 
 
 Figure~\ref{fig:na_plot_KOR} shows the variables which were interpolated.
 
@@ -224,6 +258,21 @@ Attempting to reference \cite{lamport94}.
 
 \begin{figure}
   \centering
+    \includegraphics{na_plot_KOR.pdf}
+  \caption{Scaled variables with NA values}
+  \label{fig:na_plot_KOR}
+\end{figure}
+
+\begin{figure}
+  \centering
+    \includegraphics{na_plot_USA.pdf}
+  \caption{Scaled variables with NA values}
+  \label{fig:na_plot_USA}
+\end{figure}
+
+
+\begin{figure}
+  \centering
     \includegraphics{scatterplot.pdf}
   \caption{Scatterplot of untransformed data}
   \label{fig:scatterplot}
@@ -236,12 +285,6 @@ Attempting to reference \cite{lamport94}.
   \label{fig:correlation}
 \end{figure}
 
-\begin{figure}
-  \centering
-    \includegraphics{na_plot_KOR.pdf}
-  \caption{Scaled variables with NA values}
-  \label{fig:na_plot_KOR}
-\end{figure}
 
 \newpage
 

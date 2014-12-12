@@ -26,6 +26,9 @@ country.Rda : preprocess.R cache.Rda functions.R
 %.pdf : %.R
 	R CMD BATCH $<
 
+analysis : analysis.R
+	R CMD BATCH $<
+
 view : 
 	open $(TEXFILE).pdf
 
