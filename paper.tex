@@ -204,10 +204,10 @@ Our simple approach for dealing with this was to
 make a plot of these variables over time.
 If they are approximately linear then we could 
 linearly interpolate with respect to time. The scaled plots 
-\ref{fig:na_plot_KOR} and
-\ref{fig:na_plot_USA} do appear to be mostly linear, so we interpolated. 
-In this plots one can observe that $debt_USA$ is decreasing; this is
-because $debt$ carries a sign. The value of $debt_USA$ on 
+Figure~\ref{fig:na_plot_KOR} and
+Figure~\ref{fig:na_plot_USA} do appear to be mostly linear, so we interpolated. 
+In this plots one can observe that \texttt{debt\_USA} is decreasing; this is
+because \texttt{debt} carries a sign. The value of \texttt{debt\_USA} on 
 
 When beginning this project we knew that the time dependency and
 multicollinearity would be the
@@ -218,11 +218,13 @@ We observe clear patterns emerging, with some even approaching a
 continuous mathematical functional relationship- ie the patterns
 between \texttt{gdp}, \texttt{gdp\_deflator}, and \texttt{debt} for Korea.
 Figure~\ref{fig:correlation} shows a histogram of all the pairwise sample
-correlations for the original data set- they are 
+correlations for the original data set- they are highly correlated. In
+fact, 30 \% of the columns have absolute sample correlation greater than 0.9.
 
 Our first approach for overcoming this time dependence was to create a new
 data frame from the original data by taking the difference between each
-subsequent row. More formally, if our original design matrix $X$ is $n
+subsequent row (monthly difference). 
+More formally, if our original design matrix $X$ is $n
 \times p$ then we can define a new $n - 1 \times p$ matrix $\tilde{X}$ by
 setting
 \[
@@ -231,21 +233,90 @@ setting
 for $i = 1, 2, \dots, n-1$ where $X_{i, *}$ represents the $i$th row of
 $X$.
 
-This approach did indeed eliminate the most obvious patterns, but 
-sacrifices interpretability 
+As can be observed in Figure~\ref{fig:diff_scatterplot},
+this approach did indeed eliminate the most obvious patterns, but 
+at the expense of interpretability. We attempted regression on this
+transformed data, but were unsuccessful.
 
-Our first step was to separate the data into training and validation sets,
-and only 
+\subsection{Ratios}
 
-Figure~\ref{fig:na_plot_KOR} shows the variables which were interpolated.
+Because exchange rate is a ratio of Korean currency / US dollar we decided
+to make transformed variables consisting of the Korean economic indicator
+divided by the corresponding US indicator. We also included
+\texttt{inflation} untransformed after some preliminary analysis 
+indicated that it was
+important. \texttt{Date} was intentionally left out of the model in order
+to be able to interpret the model in terms of the other parametrs. However,
+the effects of time are still present through the variables that are linear
+over time.
+
+\subsection{Analysis}
+
+Our first step when fitting the model was to separate the data into
+training and validation sets. We checked to make sure that the variables
+looked approximately the same in both training and validation sets.
+
+We used forward stepwise selection to choose a model. 
+Based on the criteria from the output of the \texttt{leaps regsubsets}
+in the appendix we chose to explore a
+model with an intercept and 5 predictor variables. The one with 5
+predictors had the lowest BIC of all the models, and the Mallow's CP at
+5.39 was significantly better than the model with 4 predictors which had a
+CP value of 13.91. Since 5.39 is close to 5 and 13.91 is pretty far from 4
+we conclude that the model with 5 variables is correct, meaning that it has
+little bias.
+
+The variables under further investigation are:
+\texttt{gdp}, \texttt{interest\_rate}, \texttt{inflation\_KOR}, 
+\texttt{inflation\_USA}, and \texttt{govspending}.
+
+The box - cox transformation in figure~\ref{fig:boxcox} suggests a
+transformation of $1 / x^2$, but this extreme and is due to the outliers.
+We used the multiplicative inverse transformation and examined the
+residual plots figure~\ref{fig:cooks} to see why this is the case. 
+
+We see
+that the points 113 and 117 are the primary outlying cases. Looking up the
+corresponding dates reveals that these are the points occuring during
+October 2008 and February 2009, during the subprime mortgage crisis
+which shook the global economy. There are no points between 113 and 117
+because the test train split didn't select them. In the validation set we
+discovered similar results for this period. The subprime mortgage crisis is
+the reason that they are outliers.
+
+
 
 Attempting to reference \cite{lamport94}.
 
 \section{Conclusions and Discussion}
 
+Our use of dynamic data caused trouble because the data was a little too
+dynamic.
 
 \newpage
 \section{Appendix}
+
+Model Selection Output:
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrrr}
+  \hline
+ & sse & bic & r2 & r2a & cp \\
+  \hline
+1 & 0.00 & -46.47 & 0.37 & 0.37 & 411.04 \\
+  2 & 0.00 & -178.62 & 0.80 & 0.79 & 55.28 \\
+  3 & 0.00 & -185.95 & 0.82 & 0.81 & 41.04 \\
+  4 & 0.00 & -206.51 & 0.85 & 0.85 & 13.91 \\
+  5 & 0.00 & -212.36 & 0.86 & 0.86 & 5.39 \\
+  6 & 0.00 & -210.43 & 0.87 & 0.86 & 4.72 \\
+  7 & 0.00 & -207.14 & 0.87 & 0.86 & 5.33 \\
+  8 & 0.00 & -202.47 & 0.87 & 0.86 & 7.22 \\
+  9 & 0.00 & -197.85 & 0.87 & 0.86 & 9.06 \\
+  10 & 0.00 & -193.12 & 0.87 & 0.86 & 11.00 \\
+   \hline
+\end{tabular}
+\end{table}
+
 
 \listoffigures
 
@@ -270,7 +341,6 @@ Attempting to reference \cite{lamport94}.
   \label{fig:na_plot_USA}
 \end{figure}
 
-
 \begin{figure}
   \centering
     \includegraphics{scatterplot.pdf}
@@ -284,6 +354,29 @@ Attempting to reference \cite{lamport94}.
   \caption{Histogram of all pairwise sample correlations}
   \label{fig:correlation}
 \end{figure}
+
+\begin{figure}
+  \centering
+    \includegraphics{diff_scatterplot.pdf}
+  \caption{Scatterplot of data after row difference transformation}
+  \label{fig:diff_scatterplot}
+\end{figure}
+
+\begin{figure}
+  \centering
+    \includegraphics{boxcox.pdf}
+  \caption{Box cox procedure on training set- affected by outliers}
+  \label{fig:boxcox}
+\end{figure}
+
+\begin{figure}
+  \centering
+    \includegraphics{cooks.pdf}
+  \caption{Cooks distance for residuals of training data}
+  \label{fig:cooks}
+\end{figure}
+
+
 
 
 \newpage

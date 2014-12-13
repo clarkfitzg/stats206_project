@@ -10,7 +10,7 @@ FIGURES := correlation.pdf us_debt.pdf na_plot_KOR.pdf
 
 # Main target
 # Running twice to make sure to get the figure references
-$(TEXFILE).pdf : $(TEXFILE).tex $(FIGURES) country.Rda
+$(TEXFILE).pdf : $(TEXFILE).tex $(FIGURES) country.Rda analysis.Rout
 	pdflatex $(TEXFILE).tex
 	pdflatex $(TEXFILE).tex
 
@@ -26,7 +26,7 @@ country.Rda : preprocess.R cache.Rda functions.R
 %.pdf : %.R
 	R CMD BATCH $<
 
-analysis : analysis.R
+analysis.Rout : analysis.R
 	R CMD BATCH $<
 
 view : 
