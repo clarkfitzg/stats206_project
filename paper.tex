@@ -295,17 +295,18 @@ $c_i$ be a nonnegative scalar for scaling.
 The final model becomes
 
 \[
-    Y = -0.69 c_1 \frac{G_{K}}{G_{US}}
-    -0.25 c_2 \frac{E_{K}}{E_{US}}
-    +0.59 c_3 \frac{R_{K}}{R_{US}}
-    +0.29 c_4I_{K} - 0.30 c_5 I_{US} + \epsilon.
+    Y = Intercept -c_1 \frac{G_{K}}{G_{US}}
+    -c_2 \frac{E_{K}}{E_{US}}
+    +c_3 \frac{R_{K}}{R_{US}}
+    +c_4I_{K} - c_5 I_{US} + \epsilon.
 \]
 
 The 95\% confidence interval does not include 0 for any of these variables,
-so we are 95\% confident that these signs are correct. Since the predictor variables
+so we are 95\% confident that the signs of the coefficients are correct. Since the predictor variables
 are scaled or ratios they are unitless. Now the model has a
 natural interpretation. Suppose that the Korean economy grows while the US
-economy remains stagnant. Then the exchange rate should decrease, because
+economy remains stagnant. This should be associated with a decreasing
+exchange rate, because
 the Korean Won will have more value relative to the US Dollar.
 From our model we can infer the following:
 
@@ -323,76 +324,20 @@ From our model we can infer the following:
         decreases as the inflation in the US gets larger.
 \end{enumerate}
 
-Common sense and economic reasoning tells us that all of these should be
+Common sense and economic reasoning tells us that all of these statements should be
 true. The data and analysis confirm our intuition. Perhaps with the use of
 time series techniques this analysis could be extended.
 
-Returning to out original questions, the results of this analysis suggest
-that if you want to exchange your currency
-to foreign currency, it would be better to do it when your home country's 
-GDP is good, or the exports are good, or the inflation is relatively lower.
+Now we return to our original questions. The results of this analysis 
+suggest a reasonable course of action if you want to exchange your currency
+to foreign currency. In relative terms, it is better to do it when your home country's 
+GDP is high, or the exports are high, or the inflation is lower.
 
 \newpage
 
-\section{Appendix - Reproducibility}
 
-Above we mentioned that the data and all analysis in the report is self 
-updating. This is accomplished through the use of GNU \texttt{make}, which
-describes a DAG (Directed Acyclic Graph) of dependencies for the final
-report. \texttt{make} detects file modifications and will lazily run all
-commands and scripts required for the final output.
 
-What does this mean? Suppose that we need more variables to do the
-regression. Thanks to the use
-of industry standard ISO codes for the countries and proper parameters in
-our code base this becomes a simple task.
-We've stored string templates for the country level 
-variables in a file
-called \texttt{template.txt}. The data collection and preprocessing steps
-are automated, so we can add more variables simply by adding a row to
-\texttt{template.txt} and entering the command \texttt{make} from the shell
-prompt, which causes the following sequence of events: 
-
-\begin{enumerate}
-    \item \texttt{make} detects the changed template file
-    \item The script \texttt{download.R} runs, updating the cache
-    \item The script \texttt{preprocess.R} runs, applying the appropriate
-        transformations and joining the tables to a form suitable for
-        analysis
-    \item All other scripts which depend on the preprocessed data run
-    \item The report output is produced
-\end{enumerate}
-
-In this case the output is a PDF, but it could just as easily be a web page
-on the department server, or an upload into another REST API.
-
-If we were doing this analysis for a client and need to run it again a year
-later with a new year of data 
-then all we have to do is type \texttt{make}. We'll still need to interpret
-plots and models, but the most time consuming work is done.
-
-One other aspect of reproducibility is version control. In this
-project we've used \texttt{Git} to collect snapshots of the project at
-every stage. The project is hosted publicly on
-Github\footnote{\url{https://github.com/clarkfitzg/stats206\_project}}.
-A look at the log file shows what work happened when and why,
-which is important for establishing provenance. In particular it shows 
-that we've been active on this project every day since
-December 1st, pushed more than 30 commits, and wrote nearly 3000 lines of
-code (including \LaTeX). Here's an example of a log entry:
-
-\begin{verbatim}
-commit e2beaf01b0a1457e7167989c1fae575c2a676f19
-Author: Clark Fitzgerald <clarkfitzg@gmail.com>
-Date:   Mon Dec 8 20:51:04 2014 -0800
-
-    implemented local caching, decoupled download step
-\end{verbatim}
-
-Through a little engineering the data analysis process
-can be made transparent, automated, extensible, and fully reproducible.
-
-\section{Appendix 1}
+\section{Appendix 1 - Plots}
 
 
 \listoffigures
@@ -474,10 +419,12 @@ number for the most recent dates.}
 
 
 \newpage
+.
+\newpage
 
-\section{Appendix 2}
+\section{Appendix 2 - R Output}
 
-\subsection{Model Selection Output}
+\subsection*{Model Selection Output}
 \begin{table}[ht]
 	\centering
 	\begin{tabular}{rrrrrr}
@@ -626,5 +573,64 @@ Residual standard error: 0.3211 on 171 degrees of freedom
 Multiple R-squared:  0.8868,	Adjusted R-squared:  0.8835 
 F-statistic: 267.9 on 5 and 171 DF,  p-value: < 2.2e-16
 \end{verbatim}
+
+\section{Appendix 3 - Reproducibility}
+
+Above we mentioned that the data and all analysis in the report is self 
+updating. This is accomplished through the use of GNU \texttt{make}, which
+describes a DAG (Directed Acyclic Graph) of dependencies for the final
+report. \texttt{make} detects file modifications and will lazily run all
+commands and scripts required for the final output.
+
+What does this mean? Suppose that we need more variables to do the
+regression. Thanks to the use
+of industry standard ISO codes for the countries and proper parameters in
+our code base this becomes a simple task.
+We've stored string templates for the country level 
+variables in a file
+called \texttt{template.txt}. The data collection and preprocessing steps
+are automated, so we can add more variables simply by adding a row to
+\texttt{template.txt} and entering the command \texttt{make} from the shell
+prompt, which causes the following sequence of events: 
+
+\begin{enumerate}
+    \item \texttt{make} detects the changed template file
+    \item The script \texttt{download.R} runs, updating the cache
+    \item The script \texttt{preprocess.R} runs, applying the appropriate
+        transformations and joining the tables to a form suitable for
+        analysis
+    \item All other scripts which depend on the preprocessed data run
+    \item The report output is produced
+\end{enumerate}
+
+In this case the output is a PDF, but it could just as easily be a web page
+on the department server, or an upload into another REST API.
+
+If we were doing this analysis for a client and need to run it again a year
+later with a new year of data 
+then all we have to do is type \texttt{make}. We'll still need to interpret
+plots and models, but the most time consuming work is done.
+
+One other aspect of reproducibility is version control. In this
+project we've used \texttt{Git} to collect snapshots of the project at
+every stage. The project is hosted publicly on
+Github\footnote{\url{https://github.com/clarkfitzg/stats206\_project}}.
+A look at the log file shows what work happened when and why,
+which is important for establishing provenance. In particular it shows 
+that we've been active on this project every day since
+December 1st, pushed more than 30 commits, and wrote nearly 3000 lines of
+code (including \LaTeX). Here's an example of a log entry:
+
+\begin{verbatim}
+commit e2beaf01b0a1457e7167989c1fae575c2a676f19
+Author: Clark Fitzgerald <clarkfitzg@gmail.com>
+Date:   Mon Dec 8 20:51:04 2014 -0800
+
+    implemented local caching, decoupled download step
+\end{verbatim}
+
+Through a little engineering the data analysis process
+can be made transparent, automated, extensible, and fully reproducible.
+
 
 \end{document}
