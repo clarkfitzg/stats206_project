@@ -234,6 +234,9 @@ summary(infm)
 
 # DFFIT is a little large. Shouldn't be bigger than this:
 2 * sqrt(6 / 121)
+
+df(0.2, 6, 121 - 6)
+
 # 113 and 117 are our big ones
 # What happened then?
 country[c(113, 117), 'Date']
@@ -255,13 +258,22 @@ qqnorm(fit8$residuals)
 # This is looking much better.
 # Try it on the test set
 test9 = test[, finalvars]
+test99 = test9[-outindex1,]
+#outlier 114 118
+outindex1 = which(row.names(test9) %in% c('114', '113', '117','118'))
+
 fit9 = lm(I(1 / exchange_rate) ~ ., data=test9)
 summary(fit9)
-plot.lm(fit9, which=4)
+plot(fit9, which=4)
+
+#no outlier
+fit99 = lm(I(1 / exchange_rate) ~ ., data=test99)
+summary(fit99)
+plot(fit99, which=4)
+
 
 coef(fit8)
 coef(fit9)
-
 form10 = exchange_rate ~ gdp + interest_rate + inflation_KOR + inflation_USA
 fit10 = lm(form10, data= tdata8)
 # Do we still need to do inverse transform if outliers are gone? 
@@ -269,3 +281,106 @@ boxcox(fit10)
 # Still calls for the inverse transform even with the outliers removed.
 summary(fit10)
 
+add = lm(I(1/exchange_rate) ~ gdp + interest_rate + inflation_KOR + inflation_USA, data = alldata1)
+add1 = lm(govspending ~ gdp + interest_rate + inflation_KOR + inflation_USA, data = alldata1)
+
+pdf('Addedvariable.pdf')
+plot(add1$resi, add$resi, main = 'Added-variable Plot for govspending', xlab = 'e(govspending|otherX)', ylab = 'e(1/(exchangerate)|otherX)')
+dev.off()
+
+summary(add)
+summary(add1)
+
+alldata = rbind(test, tr)
+outlier = which(row.names(alldata) %in% c('114', '113', '117','118'))
+alldata1 = alldata[-outlier]
+
+fit11 = lm(I(1/exchange_rate) ~ gdp + interest_rate + inflation_KOR + inflation_USA, data = alldata)
+summary(fit11)
+anova(fit11)
+plot(fit11)
+coef(fit11)
+
+
+### scaling version ###
+sdata = sapply(alldata, scale)
+sdata = as.data.frame(sdata)
+
+#I made alldata = c(tr, test), so I cut cut back to get randomized.
+str = sdata[1:121,] #train data
+stest = sdata[122:181, ] #validation data
+
+boxcox(exchange_rate ~., data = sdata) #boxcox for positive values
+rgs = regsubsets(exchange_rate ~., data = str)
+srgs = summary(rgs)
+srgs$cp #best 5
+srgs$bic #best 5
+
+sbest = srgs$which[5,]
+bsdata = str[,sbest]
+
+sfit1 = lm(exchange_rate ~ . , data = bsdata)
+summary(sfit1)
+plot(sfit1)
+plot(sfit1, which = 4)
+#outliers: 57, 55, 32
+summary(influence.measures(sfit1))
+soutlier = which(row.names(bsdata) %in% c('55', '57'))
+country[soutlier, 'Date']
+#[1] "2003-12-31" "2004-02-29"
+
+bsdata_n = bsdata[-soutlier,] #took off the outliers
+sfit2 = lm(exchange_rate ~ . , data = bsdata_n)
+summary(sfit2)
+plot(sfit2)
+plot(sfit2, which = 4) #much better
+
+#test set
+btest = stest[,sbest]
+sfit3 = lm(exchange_rate ~ . , data = btest)
+summary(sfit3)
+par(mfrow = c(2,2))
+plot(sfit3) 
+#outlier 134, 135, 145
+summary(influence.measures(sfit3))
+soutlier2 = which(row.names(btest) %in% c('134', '135'))
+country[soutlier2, 'Date']
+#[1] "2000-06-30" "2000-07-31" 
+btest_n = btest[-soutlier2,]
+
+sfit4 = lm(exchange_rate ~ . , data = btest_n)
+summary(sfit4) #still export not significant
+#took off.
+outs = which(row.names(sdata) %in% c('55', '57','134', '135'))
+sdata_n = sdata[-outs,]
+sfit5 = lm(exchange_rate ~ gdp + interest_rate + inflation_KOR + inflation_USA, data = sdata_n)
+adds = lm(exports ~ gdp + interest_rate + inflation_KOR + inflation_USA, data = sdata_n)
+plot(sfit5$residual, adds$residual) # show definitely negative trend, so shouldn't drop off.
+
+sfinal = lm(exchange_rate ~ gdp + exports + interest_rate + inflation_KOR + inflation_USA, data = sdata_n)
+summary(sfinal) # all variables are significants
+pdf('final_residual.pdf')
+par(mfrow=c(2,1))
+plot.lm(sfinal, which=c(1,2))
+dev.off()
+
+#Actually this result from scaling data is very interesting. The resason I tried it because MSE is too small number(third decimal point)(all are in small range) in the not scaled data, so I wanted to get more reasonable number, so scale the data and try it again.
+#By scaling effects, the coefficents and MSE become closer to whole numbers, but comparing the two types of outliers(from scaled data and from non-scaled data) are not common. Non-scaled data outlier showes 2007-2008 financial crisis, and scaled data outlier shows 2000 financial crisis. Why they showed up only one financial crisis not both of them??
+
+# Begin Clark's work
+dim(sdata)
+colMeans(sdata)
+
+sumfinal = summary(sfinal) 
+
+xtable(data.frame(round(coef(sfinal), 4)))
+
+sinf = influence.measures(sfinal)
+summary(sinf)
+
+# Bonferroni's for simultaneous 95 percent confidence of 5 coefficients
+multiplier = qt(1 - 0.05 / 5, nrow(sdata) - 5) * sumfinal$coefficients[, 'Std. Error']
+sfinalconf = data.frame(lower = coef(sfinal) - multiplier,
+                        upper = coef(sfinal) + multiplier)
+sfinalconf
+xtable(sfinalconf)
