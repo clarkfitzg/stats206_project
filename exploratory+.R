@@ -359,6 +359,10 @@ plot(sfit5$residual, adds$residual) # show definitely negative trend, so shouldn
 
 sfinal = lm(exchange_rate ~ gdp + exports + interest_rate + inflation_KOR + inflation_USA, data = sdata_n)
 summary(sfinal) # all variables are significants
+pdf('final_residual.pdf')
+par(mfrow=c(2,1))
+plot.lm(sfinal, which=c(1,2))
+dev.off()
 
 #Actually this result from scaling data is very interesting. The resason I tried it because MSE is too small number(third decimal point)(all are in small range) in the not scaled data, so I wanted to get more reasonable number, so scale the data and try it again.
 #By scaling effects, the coefficents and MSE become closer to whole numbers, but comparing the two types of outliers(from scaled data and from non-scaled data) are not common. Non-scaled data outlier showes 2007-2008 financial crisis, and scaled data outlier shows 2000 financial crisis. Why they showed up only one financial crisis not both of them??
@@ -367,10 +371,16 @@ summary(sfinal) # all variables are significants
 dim(sdata)
 colMeans(sdata)
 
-sumfinal = summary(sfinal) # all variables are significants
+sumfinal = summary(sfinal) 
+
+coef(sfinal)
+
+sinf = influence.measures(sfinal)
+summary(sinf)
 
 # Bonferroni's for simultaneous 95 percent confidence of 5 coefficients
 multiplier = qt(1 - 0.05 / 5, nrow(sdata) - 5) * sumfinal$coefficients[, 'Std. Error']
 sfinalconf = data.frame(lower = coef(sfinal) - multiplier,
                         upper = coef(sfinal) + multiplier)
+sfinalconf
 xtable(sfinalconf)

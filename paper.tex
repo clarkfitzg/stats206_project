@@ -46,8 +46,12 @@
 \maketitle
 
 \begin{abstract}
+
     We analyze the exchange rate between the United States and South Korea
-    (hereafter Korea) using monthly country level economic data.
+    (hereafter Korea) using monthly country level economic data and find
+    that ratios of economic indicators are useful in confirming economic
+    reasoning about the relative strengths of the two national economies.
+
 \end{abstract}
 
 \section{Introduction}
@@ -223,7 +227,7 @@ The outliers can be readily detected in the diagnostic plots
 figure~\ref{fig:cooks}. We see
 that the points 113 and 117 are the primary outlying cases, which have
 absolute DFFIT values of 1.16 and 0.89. This is much bigger than the cutoff
-of $2 / \sqrt{p / n} = 0.445$. Cook's distance is large as well.
+of $2 \sqrt{p / n} = 0.445$. Cook's distance is large as well.
 Looking up the
 corresponding dates reveals that these are the points occuring during
 October 2008 and February 2009, during the subprime mortgage crisis
@@ -254,26 +258,79 @@ For this model we have $R^2 = 0.85, MSE = 1.28^{-9}$.
 \subsection{Centering and Signs}
 
 The model above is difficult to interpret, so we decided to center the data
-to minimize multicollinearity and get more accessible numbers. After a
-similar analysis process as described above we found that the final model
-for the centered data has the same variables as well as \texttt{export}.
-
-common variables and export variable. Interesting part of this trial is
-about outliers. Its outliers are showing up 2000 finanical crisis rather
-than the subprime mortage crisis (it fitted well)~\ref{centered}. 
+to minimize multicollinearity and instead focus on the sign of the
+coefficients. After a
+similar analysis process we found that the final model
+for the centered data has the same variables as well as \texttt{exports}.
+The interesting part here were again the outliers, which this time also included
+a point from the 2000 financial crisis (see \ref{centered} in the appendix). This fit came out
+quite well, and the corresponding diagnostic plots can be seen in 
+Figure \ref{fig:final_residual}.
 
 We used Bonferroni's method to construct simultaneous 95\% confidence intervals
-for each of the 5 variables selected in the centered model.
+for each of the 5 variables selected in the centered model, producing the
+following intervals:
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrr}
+  \hline
+ & lower & upper \\
+  \hline
+  gdp & -0.80 & -0.57 \\
+  exports & -0.37 & -0.13 \\
+  interest\_rate & 0.51 & 0.68 \\
+  inflation\_KOR & 0.22 & 0.35 \\
+  inflation\_USA & -0.37 & -0.22 \\
+   \hline
+\end{tabular}
+\end{table}
 
 \section{Conclusions and Discussion}
 
-Our use of dynamic data caused trouble because the data was a little too
-dynamic.
+Let $Y$ be the exchange rate of Korean Won per US Dollar. Let $G, E, R, I$
+represent the value of GDP, exports, interest rate, and inflation, respectively.
+Let $X_K$ be the values for Korea and $X_{US}$ be the ones for the US. Let
+$c_i$ be a nonnegative scalar for scaling.
+The final model becomes
 
-Our model: $\frac{USA dollar Worthy}{KOREA Won Worthy} \sim \frac{KOREA gdp}{USA GDP} - \frac{KOREA Interest Rate}{USA Interest Rate} -  Korea inflation + USA inflation$, means when relative Korea gdp over US gdp is increasing, the won per a dollar is decreasing. The Korea Interest Rate is relatively increased over the USA Interest rate(higher interest rate means higher liquidity of money in markets), which bring the won per a dollar is increasing. Also, the signs of Korea inflation and USA inflation are different, which is very reliable because we are predicting the $\frac{USA dollar Worthy}{KOREA Won Worthy}$.
+\[
+    Y = -0.69 c_1 \frac{G_{K}}{G_{US}}
+    -0.25 c_2 \frac{E_{K}}{E_{US}}
+    +0.59 c_3 \frac{R_{K}}{R_{US}}
+    +0.29 c_4I_{K} - 0.30 c_5 I_{US} + \epsilon.
+\]
 
-Commonly, we can think if you want to exchage your currency to other foriegn currency, it would better off to do it when your country's relative gdp is greater than the foriegn, when your country's relative interest rate is less , when your contry is not on inflation, or when the foriegn country is on inflation situation.
-We have noticed exchange rates are dependent on previous exchage rates(time series) if we are available to do mutltivariate time series.
+The 95\% confidence interval does not include 0 for any of these variables,
+so we are 95\% confident that these signs are correct. Since the predictor variables
+are scaled or ratios they are unitless. Now the model has a
+natural interpretation. Suppose that the Korean economy grows while the US
+economy remains stagnant. Then the exchange rate should decrease, because
+the Korean Won will have more value relative to the US Dollar.
+From our model we can infer the following:
+
+\begin{enumerate}
+    \item The negative coefficient of $\frac{G_{K}}{G_{US}}$ means that as
+        the GDP of Korea increases relative to that of the US, the exchange
+        rate decreases. 
+    \item The negative coefficient of $\frac{E_{K}}{E_{US}}$ means that if
+        Korea increases its exports relative to the US, the exchange rate
+        decreases.
+    \item The positive coefficient of $I_K$ means that the exchange rate
+        increases as the inflation in Korea gets larger. This is a direct
+        relation that we would expect.
+    \item The negative coefficient of $I_{US}$ means that the exchange rate
+        decreases as the inflation in the US gets larger.
+\end{enumerate}
+
+Common sense and economic reasoning tells us that all of these should be
+true. The data and analysis confirm our intuition. Perhaps with the use of
+time series techniques this analysis could be extended.
+
+Returning to out original questions, the results of this analysis suggest
+that if you want to exchange your currency
+to foreign currency, it would be better to do it when your home country's 
+GDP is good, or the exports are good, or the inflation is relatively lower.
 
 \newpage
 
@@ -405,6 +462,14 @@ number for the most recent dates.}
 	\caption{Added-Variable Plot for Government Spending}
 	\label{fig:added}
 \end{figure}
+
+\begin{figure}
+  \centering
+    \includegraphics{final_residual.pdf}
+  \caption{final residual plots for centered model}
+  \label{fig:final_residual}
+\end{figure}
+
 
 
 \newpage
@@ -560,23 +625,5 @@ Residual standard error: 0.3211 on 171 degrees of freedom
 Multiple R-squared:  0.8868,	Adjusted R-squared:  0.8835 
 F-statistic: 267.9 on 5 and 171 DF,  p-value: < 2.2e-16
 \end{verbatim}
-
-\subsubsection{Bonferroni's confidence intervals on centered coefficients}
-
-\begin{table}[ht]
-\centering
-\begin{tabular}{rrr}
-  \hline
- & lower & upper \\
-  \hline
-(Intercept) & -0.10 & 0.02 \\
-  gdp & -0.80 & -0.57 \\
-  exports & -0.37 & -0.13 \\
-  interest\_rate & 0.51 & 0.68 \\
-  inflation\_KOR & 0.22 & 0.35 \\
-  inflation\_USA & -0.37 & -0.22 \\
-   \hline
-\end{tabular}
-\end{table}
 
 \end{document}
