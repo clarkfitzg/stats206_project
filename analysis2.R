@@ -66,10 +66,12 @@ dev.off()
 # 
 
 infm = influence.measures(fit7)
-summary(infm)
+xtable(summary(infm))
 
-# DFFIT is a little large. Shouldn't be bigger than this:
+# DFFIT is a little large at -1.16 and -0.89. Shouldn't be bigger than this:
 2 * sqrt(6 / 121)
+# cooks distance
+
 # 113 and 117 are our big ones
 # What happened then?
 country[c(113, 117), 'Date']
@@ -98,10 +100,24 @@ plot.lm(fit9, which=4)
 coef(fit8)
 coef(fit9)
 
-form10 = exchange_rate ~ gdp + interest_rate + inflation_KOR + inflation_USA
+form10 = I(1 / exchange_rate) ~ gdp + interest_rate + inflation_KOR + inflation_USA
 fit10 = lm(form10, data= tdata8)
 # Do we still need to do inverse transform if outliers are gone? 
 boxcox(fit10)
 # Still calls for the inverse transform even with the outliers removed.
 summary(fit10)
 
+fit11 = lm(form10, data= ratio)
+summary(fit11)
+xtable(confint(fit11), digits=-3)
+
+nooutlier = ratio[-(110:120), ]
+# With outliers gone
+fit12 = lm(form10, data= nooutlier)
+summary(fit12)
+xtable(confint(fit12))
+
+# Centering
+data13 = data.frame(scale(ratio))
+fit13 = lm(exchange_rate ~ gdp + interest_rate + inflation_KOR + inflation_USA, data=data13)
+summary(fit13)
